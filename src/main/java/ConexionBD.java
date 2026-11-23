@@ -3,16 +3,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionBD {
-    private static String variable(String nombre, String defecto) {
-        String valor = System.getenv(nombre);
-        return valor == null ? defecto : valor;
-    }
+    private static final String SERVIDOR = "localhost";
+    private static final String PUERTO = "3306";
+    private static final String BASE_DATOS = "recetario";
+    private static final String URL = "jdbc:mysql://" + SERVIDOR + ":" + PUERTO + "/" + BASE_DATOS;
+    private static final String USUARIO = "root";
+    private static final String CONTRASENA = "";
 
     public static Connection getConexion() throws SQLException {
-        String url = variable("DB_URL",
-                "jdbc:mysql://localhost:3306/recetario?connectionTimeZone=Europe/Madrid");
-        String usuario = variable("DB_USER", "root");
-        String password = variable("DB_PASSWORD", "");
-        return DriverManager.getConnection(url, usuario, password);
+        return DriverManager.getConnection(URL, USUARIO, CONTRASENA);
     }
 }

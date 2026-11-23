@@ -1,6 +1,5 @@
-
 DROP DATABASE IF EXISTS recetario;
-CREATE DATABASE recetario CHARACTER SET utf8mb4;
+CREATE DATABASE recetario;
 USE recetario;
 
 CREATE TABLE recetas (
@@ -10,12 +9,12 @@ CREATE TABLE recetas (
     tiempo_preparacion INT NOT NULL,
     dificultad VARCHAR(20) NOT NULL,
     raciones INT NOT NULL
-) ENGINE=InnoDB;
+);
 
 CREATE TABLE estadisticas (
     id INT PRIMARY KEY,
     total_recetas INT NOT NULL
-) ENGINE=InnoDB;
+);
 
 INSERT INTO recetas (nombre, categoria, tiempo_preparacion, dificultad, raciones)
 VALUES
