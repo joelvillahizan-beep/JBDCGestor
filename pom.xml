@@ -20,6 +20,12 @@
         </dependency>
     </dependencies>
     <build>
+        <sourceDirectory>Gestor/Clases/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>Gestor/Clases/Script</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
