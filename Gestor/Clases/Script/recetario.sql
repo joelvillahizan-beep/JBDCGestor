@@ -1,4 +1,4 @@
--- Ejecutar solo en la base de esta práctica: reinicia sus datos.
+
 DROP DATABASE IF EXISTS recetario;
 CREATE DATABASE recetario CHARACTER SET utf8mb4;
 USE recetario;
