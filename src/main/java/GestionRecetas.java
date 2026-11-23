@@ -19,7 +19,7 @@ public class GestionRecetas {
     public static List<Receta> listar() throws SQLException {
         List<Receta> recetas = new ArrayList<>();
         String sql = "SELECT " + CAMPOS + " FROM recetas ORDER BY id";
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) recetas.add(leerReceta(rs));
@@ -29,7 +29,7 @@ public class GestionRecetas {
 
     public static Receta buscarPorId(int id) throws SQLException {
         String sql = "SELECT " + CAMPOS + " FROM recetas WHERE id = ?";
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -48,7 +48,7 @@ public class GestionRecetas {
             throw new IllegalArgumentException("Tiempo y raciones deben ser positivos.");
     }
 
-    public static int anadir(Receta receta) throws SQLException {
+    public static void anadir(Receta receta) throws SQLException {
         comprobarTexto(receta.getNombre(), 100);
         comprobarTexto(receta.getCategoria(), 50);
         comprobarTexto(receta.getDificultad(), 20);
@@ -56,26 +56,20 @@ public class GestionRecetas {
         String sql = "INSERT INTO recetas "
                 + "(nombre, categoria, tiempo_preparacion, dificultad, raciones) "
                 + "VALUES (?, ?, ?, ?, ?)";
-        try (Connection c = ConexionBD.conectar()) {
+        try (Connection c = ConexionBD.getConexion()) {
             c.setAutoCommit(false);
             try {
-                int id;
-                try (PreparedStatement ps = c.prepareStatement(sql,
-                        Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement ps = c.prepareStatement(sql)) {
                     ps.setString(1, receta.getNombre());
                     ps.setString(2, receta.getCategoria());
                     ps.setInt(3, receta.getTiempoPreparacion());
                     ps.setString(4, receta.getDificultad());
                     ps.setInt(5, receta.getRaciones());
-                    ps.executeUpdate();
-                    try (ResultSet rs = ps.getGeneratedKeys()) {
-                        if (!rs.next()) throw new SQLException("No se obtuvo el id.");
-                        id = rs.getInt(1);
-                    }
+                    if (ps.executeUpdate() != 1)
+                        throw new SQLException("No se pudo añadir la receta.");
                 }
                 cambiarTotal(c, 1);
                 c.commit();
-                return id;
             } catch (SQLException e) {
                 deshacer(c, e);
                 throw e;
@@ -106,7 +100,7 @@ public class GestionRecetas {
     public static boolean modificar(int id, int tiempo, int raciones) throws SQLException {
         comprobarCantidades(tiempo, raciones);
         String sql = "UPDATE recetas SET tiempo_preparacion = ?, raciones = ? WHERE id = ?";
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, tiempo);
             ps.setInt(2, raciones);
@@ -116,7 +110,7 @@ public class GestionRecetas {
     }
 
     public static boolean eliminar(int id) throws SQLException {
-        try (Connection c = ConexionBD.conectar()) {
+        try (Connection c = ConexionBD.getConexion()) {
             c.setAutoCommit(false);
             try {
                 int filas;
@@ -136,7 +130,7 @@ public class GestionRecetas {
 
     public static List<Receta> buscarPorNombre(String nombre) throws SQLException {
         List<Receta> recetas = new ArrayList<>();
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              CallableStatement cs = c.prepareCall("{call buscarReceta(?)}")) {
             cs.setString(1, nombre);
             try (ResultSet rs = cs.executeQuery()) {
@@ -148,7 +142,7 @@ public class GestionRecetas {
 
     public static int totalRecetas() throws SQLException {
         String sql = "SELECT total_recetas FROM estadisticas WHERE id = ?";
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, 1);
             try (ResultSet rs = ps.executeQuery()) {
@@ -163,7 +157,7 @@ public class GestionRecetas {
         System.out.println("Fecha y hora: " + ZonedDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss VV XXX")));
         System.out.println("Java: " + System.getProperty("java.version"));
-        try (Connection c = ConexionBD.conectar();
+        try (Connection c = ConexionBD.getConexion();
              PreparedStatement ps = c.prepareStatement(
                      "SELECT CURRENT_USER(), DATABASE(), VERSION(), NOW()" );
              ResultSet rs = ps.executeQuery()) {
@@ -227,7 +221,8 @@ public class GestionRecetas {
                         Receta nueva = new Receta(0, texto("Nombre: ", 100),
                                 texto("Categoría: ", 50), entero("Tiempo (minutos): "),
                                 texto("Dificultad: ", 20), entero("Raciones: "));
-                        System.out.println("Receta añadida. Id: " + anadir(nueva));
+                        anadir(nueva);
+                        System.out.println("Receta añadida correctamente.");
                         break;
                     case 4:
                         boolean cambiada = modificar(entero("Id: "),

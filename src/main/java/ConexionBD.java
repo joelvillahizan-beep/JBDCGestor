@@ -8,7 +8,7 @@ public class ConexionBD {
         return valor == null ? defecto : valor;
     }
 
-    public static Connection conectar() throws SQLException {
+    public static Connection getConexion() throws SQLException {
         String url = variable("DB_URL",
                 "jdbc:mysql://localhost:3306/recetario?connectionTimeZone=Europe/Madrid");
         String usuario = variable("DB_USER", "root");
