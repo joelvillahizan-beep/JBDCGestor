@@ -1,0 +1,52 @@
+VERIFICACIÓN REAL DE GESTORRECETAS
+Usuario del sistema: agent
+Fecha y hora: 23/11/2026 09:26:34 Europe/Madrid +01:00
+Java: 21.0.13
+Usuario MySQL: recetario_app@localhost
+Base de datos: recetario
+Servidor MySQL: 8.4.6
+Fecha y hora del servidor: 2026-11-23 09:26:34
+Driver: mysql-connector-j-9.1.0 (Revision: cf2917ea44ae2e43a4514a33771035aa99de73bf)
+OK 1: Estado inicial: 8 recetas y estadística 8
+1 | Tortilla de patatas | Principal | 30 min | Fácil | 4
+2 | Ensalada César | Ensalada | 15 min | Fácil | 2
+3 | Lasaña | Pasta | 75 min | Media | 6
+4 | Gazpacho | Sopa | 20 min | Fácil | 4
+5 | Tarta de queso | Postre | 90 min | Media | 8
+6 | Paella | Arroz | 60 min | Difícil | 6
+7 | Croquetas de jamón | Entrante | 45 min | Media | 4
+8 | Brownie | Postre | 40 min | Fácil | 8
+OK 2: Buscar id 1 devuelve Tortilla de patatas
+OK 3: Id inexistente sin resultado
+
+ALTA Y COMMIT
+Id de la receta añadida: 9
+OK 4: Alta persistida en otra conexión
+OK 5: Commit: 9 recetas y estadística 9
+OK 6: Modificación realizada
+9 | Arroz de prueba UD02 | Arroz | 35 min | Fácil | 4
+OK 7: Consulta posterior: 35 minutos y 4 raciones
+OK 8: Modificar id inexistente devuelve false
+
+PROCEDIMIENTO ALMACENADO
+OK 9: CallableStatement devuelve la receta por nombre
+1 | Tortilla de patatas | Principal | 30 min | Fácil | 4
+OK 10: Nombre inexistente sin resultados
+OK 11: El texto con comillas se trata como dato
+OK 12: Se rechaza un tiempo igual a cero
+
+ELIMINACIÓN
+OK 13: Receta eliminada
+OK 14: Baja confirmada: 8 recetas y estadística 8
+OK 15: Borrar un id inexistente no cambia el total
+
+ERROR CONTROLADO Y ROLLBACK
+Solo en esta base de pruebas: total temporal = 2147483647
+Error SQL recibido: Data truncation: Out of range value for column 'total_recetas' at row 1
+OK 16: Falla el UPDATE por desbordamiento del contador INT
+OK 17: Rollback: la receta insertada no permanece en la base
+OK 18: Rollback: siguen existiendo las 8 recetas iniciales
+OK 19: El contador conserva su valor anterior a la transacción
+OK 20: Restauración de la prueba: 8 recetas y estadística 8
+
+RESULTADO: 20 comprobaciones correctas.
