@@ -58,25 +58,30 @@ public class GestionRecetas {
             con.setAutoCommit(false);
 
             try {
+                int filasReceta;
                 try (PreparedStatement pstmt = con.prepareStatement(sql)) {
                     pstmt.setString(1, receta.nombre);
                     pstmt.setString(2, receta.categoria);
                     pstmt.setInt(3, receta.tiempoPreparacion);
                     pstmt.setString(4, receta.dificultad);
                     pstmt.setInt(5, receta.raciones);
-                    if (pstmt.executeUpdate() != 1) {
-                        throw new SQLException("No se ha podido añadir la receta.");
+                    filasReceta = pstmt.executeUpdate();
+                }
+
+                int filasTotal = 0;
+                if (filasReceta == 1) {
+                    try (PreparedStatement pstmt = con.prepareStatement(sqlTotal)) {
+                        filasTotal = pstmt.executeUpdate();
                     }
                 }
 
-                try (PreparedStatement pstmt = con.prepareStatement(sqlTotal)) {
-                    if (pstmt.executeUpdate() != 1) {
-                        throw new SQLException("No se ha podido actualizar el total.");
-                    }
+                if (filasReceta == 1 && filasTotal == 1) {
+                    con.commit();
+                    System.out.println("Receta añadida. Transacción confirmada.");
+                } else {
+                    con.rollback();
+                    System.out.println("Transacción cancelada.");
                 }
-
-                con.commit();
-                System.out.println("Receta añadida. Transacción confirmada.");
             } catch (SQLException e) {
                 con.rollback();
                 System.out.println("Error: " + e.getMessage());
@@ -117,16 +122,20 @@ public class GestionRecetas {
                     filas = pstmt.executeUpdate();
                 }
 
+                int filasTotal = 1;
                 if (filas == 1) {
                     try (PreparedStatement pstmt = con.prepareStatement(sqlTotal)) {
-                        if (pstmt.executeUpdate() != 1) {
-                            throw new SQLException("No se ha podido actualizar el total.");
-                        }
+                        filasTotal = pstmt.executeUpdate();
                     }
                 }
 
-                con.commit();
-                System.out.println("Recetas eliminadas: " + filas);
+                if (filasTotal == 1) {
+                    con.commit();
+                    System.out.println("Recetas eliminadas: " + filas);
+                } else {
+                    con.rollback();
+                    System.out.println("Transacción cancelada.");
+                }
             } catch (SQLException e) {
                 con.rollback();
                 System.out.println("Error: " + e.getMessage());
